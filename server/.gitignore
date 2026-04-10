@@ -1,0 +1,55 @@
+# --- OS Generated Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# --- IDEs and Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+
+# --- Dependencies ---
+node_modules/
+jspm_packages/
+bower_components/
+vendor/
+.venv/
+venv/
+env/
+bin/
+obj/
+
+# --- Build and Output ---
+dist/
+build/
+out/
+target/
+*.exe
+*.dll
+*.so
+*.dylib
+*.class
+*.pyc
+*.pyo
+
+# --- Logs and Temporary Files ---
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+tmp/
+temp/
+
+# --- Secrets and Environment Variables ---
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
