@@ -21,6 +21,11 @@ await connectDB()
 
 const app = express();
 
+/** Vercel sets VERCEL=1; cookies must be Secure + SameSite=None for cross-subdomain requests from the SPA. */
+const isCrossOriginDeployed =
+    process.env.VERCEL === '1' ||
+    process.env.NODE_ENV === 'production';
+
 const isAllowedOrigin = (origin: string | undefined): boolean => {
     if (!origin) return true;
     const fromEnv = (process.env.CLIENT_URL ?? '')
@@ -60,8 +65,8 @@ app.use(session({
     cookie:{
         maxAge: 1000 * 60 * 60 * 24 * 7,
         httpOnly:true,
-        secure:process.env.NODE_ENV === 'production',
-        sameSite:process.env.NODE_ENV === 'production' ? 'none': 'lax',
+        secure: isCrossOriginDeployed,
+        sameSite: isCrossOriginDeployed ? 'none' : 'lax',
         path:'/'
     }, 
     store:MongoStore.create({
@@ -83,7 +88,12 @@ app.use('/api/user',UserRouter)
 app.use('/api/contact',ContactRouter)
 app.use('/api/admin',AdminRouter)
 
+// Vercel runs this file as a serverless function — it must receive (req, res) via the exported app.
+// app.listen() is only for local `npm run server`.
+export default app;
 
-app.listen(port, () => {
-    console.log(`Server is running at http://localhost:${port}`);
-});
+if (process.env.VERCEL !== '1') {
+    app.listen(port, () => {
+        console.log(`Server is running at http://localhost:${port}`);
+    });
+}
