@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { IUser } from "../assets/assets";
-import api from "../configs/api";
+import api, { AUTH_TOKEN_KEY } from "../configs/api";
 import toast from "react-hot-toast";
 import axios from "axios";
 
@@ -47,6 +47,9 @@ export const AuthProvider = ({children}:{children:React.ReactNode})=>{
                 setUser(data.user as IUser)
                 setIsLoggedIn(true)
             }
+            if (data.token) {
+                localStorage.setItem(AUTH_TOKEN_KEY, data.token as string)
+            }
             toast.success(data.message)
 
         } catch (error: unknown) {
@@ -62,6 +65,9 @@ export const AuthProvider = ({children}:{children:React.ReactNode})=>{
                 setUser(data.user as IUser)
                 setIsLoggedIn(true)
             }
+            if (data.token) {
+                localStorage.setItem(AUTH_TOKEN_KEY, data.token as string)
+            }
             toast.success(data.message)
             
         } catch (error: unknown) {
@@ -72,13 +78,14 @@ export const AuthProvider = ({children}:{children:React.ReactNode})=>{
     const logout = async()=>{
         try {
             const {data} = await api.post('/api/auth/logout')
-            setUser(null)
-            setIsLoggedIn(false)
             toast.success(data.message)
-            
         } catch (error: unknown) {
             console.log(error);
             toast.error(getErrorMessage(error))
+        } finally {
+            localStorage.removeItem(AUTH_TOKEN_KEY)
+            setUser(null)
+            setIsLoggedIn(false)
         }
     }
     const fetchUser = async()=>{
@@ -93,6 +100,7 @@ export const AuthProvider = ({children}:{children:React.ReactNode})=>{
         } catch (error) {
             console.log(error);
             if (axios.isAxiosError(error) && error.response?.status === 401) {
+                localStorage.removeItem(AUTH_TOKEN_KEY)
                 setUser(null)
                 setIsLoggedIn(false)
             }

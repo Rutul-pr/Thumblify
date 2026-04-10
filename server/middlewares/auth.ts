@@ -1,13 +1,28 @@
-import { Request,Response,NextFunction } from "express";
+import { Request, Response, NextFunction } from 'express';
+import { verifyAuthToken } from '../utils/authToken.js';
 
-const protect = async(req:Request,res:Response,next:NextFunction)=>{
-    const {isLoggedIn,userId} = req.session
+const protect = async (req: Request, res: Response, next: NextFunction) => {
+    let { isLoggedIn, userId } = req.session;
 
     if (!isLoggedIn || !userId) {
-        return res.status(401).json({message:'You are not logged in'})
+        const raw = req.headers.authorization;
+        const token = raw?.startsWith('Bearer ') ? raw.slice(7).trim() : null;
+        if (token) {
+            const parsed = verifyAuthToken(token);
+            if (parsed) {
+                req.session.isLoggedIn = true;
+                req.session.userId = parsed.userId;
+                isLoggedIn = true;
+                userId = parsed.userId;
+            }
+        }
     }
 
-    next()
-}
+    if (!isLoggedIn || !userId) {
+        return res.status(401).json({ message: 'You are not logged in' });
+    }
 
-export default protect
+    next();
+};
+
+export default protect;

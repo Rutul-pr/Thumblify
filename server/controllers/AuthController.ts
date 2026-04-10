@@ -1,6 +1,7 @@
-import {Request,Response} from 'express'
+import { Request, Response } from 'express';
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
+import { signAuthToken } from '../utils/authToken.js';
 
 /** Required on serverless (e.g. Vercel): persist session to Mongo before sending the response. */
 const jsonAfterSessionSave = (
@@ -13,7 +14,8 @@ const jsonAfterSessionSave = (
             console.log(err);
             return res.status(500).json({ message: err.message });
         }
-        return res.json(body);
+        const token = signAuthToken(String(body.user._id));
+        return res.json({ ...body, token });
     });
 };
 
