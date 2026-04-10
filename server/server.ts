@@ -21,11 +21,35 @@ await connectDB()
 
 const app = express();
 
-// Middlewares
-app.use(cors({
-    origin:['http://localhost:5173','http://localhost:3000',"https://thumblify-rutul.vercel.app"],
-    credentials:true,
-}))
+const isAllowedOrigin = (origin: string | undefined): boolean => {
+    if (!origin) return true;
+    const fromEnv = (process.env.CLIENT_URL ?? '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    const allowed = new Set(['http://localhost:5173', 'http://localhost:3000', ...fromEnv]);
+    if (allowed.has(origin)) return true;
+    try {
+        const { hostname } = new URL(origin);
+        if (hostname === 'localhost' || hostname.endsWith('.vercel.app')) return true;
+    } catch {
+        return false;
+    }
+    return false;
+};
+
+// Middlewares — credentials + exact Origin reflection (required for cross-site session cookies)
+app.use(
+    cors({
+        origin(origin, callback) {
+            if (isAllowedOrigin(origin)) {
+                return callback(null, true);
+            }
+            return callback(null, false);
+        },
+        credentials: true,
+    })
+);
 
 app.set('trust proxy',1)
 

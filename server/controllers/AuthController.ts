@@ -2,6 +2,21 @@ import {Request,Response} from 'express'
 import User from '../models/User.js';
 import bcrypt from 'bcrypt';
 
+/** Required on serverless (e.g. Vercel): persist session to Mongo before sending the response. */
+const jsonAfterSessionSave = (
+    req: Request,
+    res: Response,
+    body: { message: string; user: { _id: unknown; name: string; email: string } }
+) => {
+    req.session.save((err) => {
+        if (err) {
+            console.log(err);
+            return res.status(500).json({ message: err.message });
+        }
+        return res.json(body);
+    });
+};
+
 // Controllers for User Registration (Sign Up)
 export const registerUser = async (req:Request,res:Response)=>{
     try {
@@ -25,7 +40,7 @@ export const registerUser = async (req:Request,res:Response)=>{
         req.session.isLoggedIn = true
         req.session.userId = newUser._id
 
-        return res.json({
+        jsonAfterSessionSave(req, res, {
             message:'Account Created Successfully',
             user:{
                 _id:newUser._id,
@@ -64,7 +79,7 @@ export const loginUser = async (req:Request,res:Response)=>{
         req.session.isLoggedIn = true
         req.session.userId = user._id
 
-        return res.json({
+        jsonAfterSessionSave(req, res, {
             message:'Login Successful',
             user:{
                 _id:user._id,
@@ -87,8 +102,8 @@ export const logoutUser = async (req:Request,res:Response)=>{
             console.log(error);
             return res.status(500).json({message:error.message})
         }
+        return res.json({message:'Logout Successful'})
     })
-    return res.json({message:'Logout Successful'})
 }
 
 // controller function to verify whether the user exists or not

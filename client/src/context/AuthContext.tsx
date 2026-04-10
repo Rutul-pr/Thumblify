@@ -92,6 +92,10 @@ export const AuthProvider = ({children}:{children:React.ReactNode})=>{
             
         } catch (error) {
             console.log(error);
+            if (axios.isAxiosError(error) && error.response?.status === 401) {
+                setUser(null)
+                setIsLoggedIn(false)
+            }
         }
     }
 
