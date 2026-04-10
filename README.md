@@ -50,4 +50,3 @@ A full-stack AI-powered YouTube thumbnail generator built with React, Node.js, E
 **AI:**
 - Pollinations AI (Free, No API Key Required)
 
-## 📁 Project Structure
