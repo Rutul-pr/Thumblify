@@ -163,8 +163,6 @@
 
 import { Request, Response } from "express"
 import Thumbnail from "../models/Thumbnail.js";
-import path from "path";
-import fs from "fs";
 import { v2 as cloudinary } from 'cloudinary'
 
 const stylePrompts = {
@@ -249,25 +247,24 @@ export const generateThumbnail = async (req: Request, res: Response) => {
         }
         // ---- END POLLINATIONS AI ----
 
-        const filename = `final-output-${Date.now()}.png`;
-        const filepath = path.join('images', filename);
-
-        // Create image directory if not exists
-        fs.mkdirSync('images', { recursive: true });
-
-        // Write the final image to the file
-        fs.writeFileSync(filepath, imageBuffer);
-
-        const uploadResult = await cloudinary.uploader.upload(filepath, { resource_type: 'image' });
+        const uploadResult = await new Promise<{ url: string }>((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                { resource_type: 'image', folder: 'thumblify' },
+                (error, result) => {
+                    if (error || !result?.url) {
+                        return reject(error ?? new Error('Cloudinary upload failed'));
+                    }
+                    resolve({ url: result.url });
+                }
+            );
+            uploadStream.end(imageBuffer);
+        });
 
         thumbnail.image_url = uploadResult.url;
         thumbnail.isGenerating = false;
         await thumbnail.save();
 
         res.json({ message: 'Thumbnail Generated', thumbnail });
-
-        // Remove the image file from disk after upload
-        fs.unlinkSync(filepath);
 
     } catch (error: any) {
         console.log(error);
