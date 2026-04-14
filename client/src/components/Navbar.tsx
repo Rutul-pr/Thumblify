@@ -53,9 +53,20 @@ export default function Navbar() {
                                 {user?.name.charAt(0).toUpperCase()}
                             </button>
                             <div className="absolute hidden group-hover:block top-6 right-0 pt-4">
-                                <button onClick={handleLogout} className="bg-white/20 border-2 border-white/10 px-5 py-1.5 rounded">
-                                    Logout
-                                </button>
+                                <div className="flex min-w-32 flex-col gap-1 rounded-md border-2 border-white/10 bg-black/70 p-1.5 backdrop-blur">
+                                    <button
+                                        onClick={() => navigate('/profile')}
+                                        className="rounded px-3 py-1.5 text-left hover:bg-white/15"
+                                    >
+                                        Profile
+                                    </button>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="rounded px-3 py-1.5 text-left hover:bg-white/15"
+                                    >
+                                        Logout
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     ) : (
@@ -88,7 +99,10 @@ export default function Navbar() {
                 </>
                )}
                 {isLoggedIn 
-                ?<button onClick={async ()=>{setIsOpen(false); await handleLogout();}}>Logout</button>
+                ?<>
+                    <Link onClick={() => setIsOpen(false)} to='/profile' >Profile</Link>
+                    <button onClick={async ()=>{setIsOpen(false); await handleLogout();}}>Logout</button>
+                </>
                 :<Link onClick={() => setIsOpen(false)} to='/login' >Login</Link>
                 }
                 

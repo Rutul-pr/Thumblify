@@ -13,6 +13,7 @@ import { useEffect } from "react";
 import {Toaster} from 'react-hot-toast';
 import About from "./pages/About";
 import AdminMessages from "./pages/AdminMessages";
+import Profile from "./pages/Profile";
 
 export default function App() {
 
@@ -35,6 +36,7 @@ export default function App() {
                 <Route path="/preview" element={<YtPreview />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/about" element={<About />} />
+                <Route path="/profile" element={<Profile />} />
                 <Route path="/admin/messages" element={<AdminMessages />} />
                 <Route path="/login" element={<Login />} />
             </Routes>
